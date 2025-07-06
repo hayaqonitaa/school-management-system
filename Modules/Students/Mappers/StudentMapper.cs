@@ -38,5 +38,20 @@ namespace SchoolManagementSystem.Modules.Students.Mappers
         {
             return entities.Select(e => e.ToResponseDTO()).ToList();
         }
+
+        // Update Entity from DTO (menyimpan existing properties)
+        public static void UpdateFromDTO(this Student entity, CreateStudentDTO dto, string? hashedPassword = null)
+        {
+            entity.NISN = dto.NISN;
+            entity.FullName = dto.FullName;
+            entity.Email = dto.Email;
+            entity.PhoneNumber = dto.PhoneNumber;
+            
+            // update password hanya jika diubah
+            if (!string.IsNullOrEmpty(hashedPassword))
+            {
+                entity.Password = hashedPassword;
+            }
+        }
     }
 }

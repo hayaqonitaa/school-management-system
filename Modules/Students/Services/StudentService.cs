@@ -2,6 +2,7 @@ using BCrypt.Net;
 using SchoolManagementSystem.Modules.Students.Dtos;
 using SchoolManagementSystem.Modules.Students.Entities;
 using SchoolManagementSystem.Modules.Students.Repositories;
+using SchoolManagementSystem.Modules.Students.Mappers;
 
 namespace SchoolManagementSystem.Modules.Students.Services
 {
@@ -33,28 +34,14 @@ namespace SchoolManagementSystem.Modules.Students.Services
             // hash password
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(createStudentDTO.Password);
             
-            // create student entity
-            var student = new Student
-            {
-                NISN = createStudentDTO.NISN,
-                FullName = createStudentDTO.FullName,
-                Email = createStudentDTO.Email,
-                Password = hashedPassword,
-                PhoneNumber = createStudentDTO.PhoneNumber
-            };
+            // create student entity using mapper
+            var student = createStudentDTO.ToEntity(hashedPassword);
             
             // save to database
             var createdStudent = await _studentRepository.CreateAsync(student);
             
-            // return response DTO
-            return new StudentResponseDTO
-            {
-                Id = createdStudent.Id,
-                NISN = createdStudent.NISN,
-                FullName = createdStudent.FullName,
-                Email = createdStudent.Email,
-                PhoneNumber = createdStudent.PhoneNumber
-            };
+            // return response DTO using mapper
+            return createdStudent.ToResponseDTO();
         }
         
         public async Task<StudentResponseDTO?> GetStudentByIdAsync(int id)
@@ -62,28 +49,13 @@ namespace SchoolManagementSystem.Modules.Students.Services
             var student = await _studentRepository.GetByIdAsync(id);
             if (student == null) return null;
             
-            return new StudentResponseDTO
-            {
-                Id = student.Id,
-                NISN = student.NISN,
-                FullName = student.FullName,
-                Email = student.Email,
-                PhoneNumber = student.PhoneNumber,
-            };
+            return student.ToResponseDTO();
         }
         
         public async Task<List<StudentResponseDTO>> GetAllStudentsAsync()
         {
             var students = await _studentRepository.GetAllAsync();
-            
-            return students.Select(student => new StudentResponseDTO
-            {
-                Id = student.Id,
-                NISN = student.NISN,
-                FullName = student.FullName,
-                Email = student.Email,
-                PhoneNumber = student.PhoneNumber
-            }).ToList();
+            return students.ToResponseDTOList();
         }
         
         public async Task<StudentResponseDTO> UpdateStudentAsync(int id, CreateStudentDTO updateStudentDTO)
@@ -107,28 +79,16 @@ namespace SchoolManagementSystem.Modules.Students.Services
                 throw new ArgumentException("Email already exists");
             }
             
-            // update student properties
-            student.NISN = updateStudentDTO.NISN;
-            student.FullName = updateStudentDTO.FullName;
-            student.Email = updateStudentDTO.Email;
-            student.PhoneNumber = updateStudentDTO.PhoneNumber;
+            // update student properties using mapper
+            var hashedPassword = !string.IsNullOrEmpty(updateStudentDTO.Password) 
+                ? BCrypt.Net.BCrypt.HashPassword(updateStudentDTO.Password) 
+                : null;
             
-            // update password
-            if (!string.IsNullOrEmpty(updateStudentDTO.Password))
-            {
-                student.Password = BCrypt.Net.BCrypt.HashPassword(updateStudentDTO.Password);
-            }
+            student.UpdateFromDTO(updateStudentDTO, hashedPassword);
             
             var updatedStudent = await _studentRepository.UpdateAsync(student);
             
-            return new StudentResponseDTO
-            {
-                Id = updatedStudent.Id,
-                NISN = updatedStudent.NISN,
-                FullName = updatedStudent.FullName,
-                Email = updatedStudent.Email,
-                PhoneNumber = updatedStudent.PhoneNumber,
-            };
+            return updatedStudent.ToResponseDTO();
         }
         
         public async Task<bool> DeleteStudentAsync(int id)
