@@ -24,16 +24,6 @@ namespace SchoolManagementSystem.Modules.Students.Repositories
             return await _context.Students.FindAsync(id);
         }
         
-        public async Task<Student?> GetByNISNAsync(string nisn)
-        {
-            return await _context.Students.FirstOrDefaultAsync(s => s.NISN == nisn);
-        }
-        
-        public async Task<Student?> GetByEmailAsync(string email)
-        {
-            return await _context.Students.FirstOrDefaultAsync(s => s.Email == email);
-        }
-        
         public async Task<List<Student>> GetAllAsync()
         {
             return await _context.Students.ToListAsync();

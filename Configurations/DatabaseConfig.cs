@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SchoolManagementSystem.Modules.Students.Entities;
 using SchoolManagementSystem.Modules.Teachers.Entities;
 using SchoolManagementSystem.Modules.Users.Entities;
+using SchoolManagementSystem.Modules.Admins.Entities;
 
 public class DatabaseConfig : DbContext
 {
@@ -12,11 +13,12 @@ public class DatabaseConfig : DbContext
     public DbSet<Student> Students { get; set; }
     public DbSet<Teacher> Teachers { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Admin> Admins { get; set; }
 
     public override int SaveChanges()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => (e.Entity is Student || e.Entity is Teacher || e.Entity is User) && (
+            .Where(e => (e.Entity is Student || e.Entity is Teacher || e.Entity is User || e.Entity is Admin) && (
                 e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entityEntry in entries)
@@ -43,6 +45,14 @@ public class DatabaseConfig : DbContext
                 if (entityEntry.State == EntityState.Added)
                 {
                     user.CreatedAt = DateTime.UtcNow;
+                }
+            }
+            else if (entityEntry.Entity is Admin admin)
+            {
+                admin.UpdatedAt = DateTime.UtcNow;
+                if (entityEntry.State == EntityState.Added)
+                {
+                    admin.CreatedAt = DateTime.UtcNow;
                 }
             }
         }
@@ -53,7 +63,7 @@ public class DatabaseConfig : DbContext
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => (e.Entity is Student || e.Entity is Teacher || e.Entity is User) && (
+            .Where(e => (e.Entity is Student || e.Entity is Teacher || e.Entity is User || e.Entity is Admin) && (
                 e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entityEntry in entries)
@@ -80,6 +90,14 @@ public class DatabaseConfig : DbContext
                 if (entityEntry.State == EntityState.Added)
                 {
                     user.CreatedAt = DateTime.UtcNow;
+                }
+            }
+            else if (entityEntry.Entity is Admin admin)
+            {
+                admin.UpdatedAt = DateTime.UtcNow;
+                if (entityEntry.State == EntityState.Added)
+                {
+                    admin.CreatedAt = DateTime.UtcNow;
                 }
             }
         }

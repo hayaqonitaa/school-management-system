@@ -50,5 +50,23 @@ namespace SchoolManagementSystem.Modules.Auth
                 return BadRequest(new { message = ex.Message });
             }
         }
+        
+        [HttpPost("admin/login")]
+        public async Task<IActionResult> AdminLogin(LoginRequestDTO loginRequest)
+        {
+            try
+            {
+                var response = await _authService.LoginAdminAsync(loginRequest);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

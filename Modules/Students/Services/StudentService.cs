@@ -23,14 +23,16 @@ namespace SchoolManagementSystem.Modules.Students.Services
         public async Task<StudentResponseDTO> CreateStudentAsync(CreateStudentDTO createStudentDTO)
         {
             // cek NISN
-            var existingStudentByNISN = await _studentRepository.GetByNISNAsync(createStudentDTO.NISN);
+            var existingStudentByNISN = await _context.Students
+                .FirstOrDefaultAsync(s => s.NISN == createStudentDTO.NISN);
             if (existingStudentByNISN != null)
             {
                 throw new ArgumentException("NISN already exists");
             }
             
             // cek email
-            var existingStudentByEmail = await _studentRepository.GetByEmailAsync(createStudentDTO.Email);
+            var existingStudentByEmail = await _context.Students
+                .FirstOrDefaultAsync(s => s.Email == createStudentDTO.Email);
             if (existingStudentByEmail != null)
             {
                 throw new ArgumentException("Email already exists");
@@ -66,22 +68,6 @@ namespace SchoolManagementSystem.Modules.Students.Services
             return student.ToResponseDTO();
         }
         
-        public async Task<StudentResponseDTO?> GetStudentByNISNAsync(string nisn)
-        {
-            var student = await _studentRepository.GetByNISNAsync(nisn);
-            if (student == null) return null;
-            
-            return student.ToResponseDTO();
-        }
-        
-        public async Task<StudentResponseDTO?> GetStudentByEmailAsync(string email)
-        {
-            var student = await _studentRepository.GetByEmailAsync(email);
-            if (student == null) return null;
-            
-            return student.ToResponseDTO();
-        }
-        
         public async Task<List<StudentResponseDTO>> GetAllStudentsAsync()
         {
             var students = await _studentRepository.GetAllAsync();
@@ -96,15 +82,17 @@ namespace SchoolManagementSystem.Modules.Students.Services
                 throw new ArgumentException("Student not found");
             }
             
-            var existingStudentByNISN = await _studentRepository.GetByNISNAsync(updateStudentDTO.NISN);
-            if (existingStudentByNISN != null && existingStudentByNISN.Id != id)
+            var existingStudentByNISN = await _context.Students
+                .FirstOrDefaultAsync(s => s.NISN == updateStudentDTO.NISN && s.Id != id);
+            if (existingStudentByNISN != null)
             {
                 throw new ArgumentException("NISN already exists");
             }
             
             // if email already exists (kecuali current student)
-            var existingStudentByEmail = await _studentRepository.GetByEmailAsync(updateStudentDTO.Email);
-            if (existingStudentByEmail != null && existingStudentByEmail.Id != id)
+            var existingStudentByEmail = await _context.Students
+                .FirstOrDefaultAsync(s => s.Email == updateStudentDTO.Email && s.Id != id);
+            if (existingStudentByEmail != null)
             {
                 throw new ArgumentException("Email already exists");
             }

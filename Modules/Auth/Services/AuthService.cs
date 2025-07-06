@@ -6,12 +6,14 @@ using SchoolManagementSystem.Modules.Auth.Dtos;
 using SchoolManagementSystem.Modules.Students.Entities;
 using SchoolManagementSystem.Modules.Teachers.Entities;
 using SchoolManagementSystem.Modules.Users.Entities;
+using SchoolManagementSystem.Modules.Admins.Entities;
 
 namespace SchoolManagementSystem.Modules.Auth.Services
 {
     public interface IAuthService
     {
         Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequest);
+        Task<LoginResponseDTO> LoginAdminAsync(LoginRequestDTO loginRequest);
         Task<LoginResponseDTO> RegisterAsync(RegisterRequestDTO registerRequest);
     }
     
@@ -176,6 +178,48 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 Email = registerRequest.Email,
                 Role = UserRoles.GetRoleName(registerRequest.RoleId),
                 RoleId = registerRequest.RoleId,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+        }
+        
+        public async Task<LoginResponseDTO> LoginAdminAsync(LoginRequestDTO loginRequest)
+        {
+            // Find admin by email
+            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Email == loginRequest.Email && a.IsActive);
+            if (admin == null)
+            {
+                throw new UnauthorizedAccessException("Invalid admin credentials");
+            }
+            
+            // Verify password
+            if (!BCrypt.Net.BCrypt.Verify(loginRequest.Password, admin.Password))
+            {
+                throw new UnauthorizedAccessException("Invalid admin credentials");
+            }
+            
+            // Find or create corresponding user record
+            var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == admin.Id && u.Role == UserRoles.Admin);
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    IdUser = admin.Id,
+                    Role = UserRoles.Admin
+                };
+                _context.Users.Add(adminUser);
+                await _context.SaveChangesAsync();
+            }
+            
+            // Generate JWT token with Admin role
+            var token = _jwtHelper.GenerateToken(adminUser.Id, admin.Email, UserRoles.Admin);
+            
+            return new LoginResponseDTO
+            {
+                Token = token,
+                UserId = adminUser.Id,
+                Email = admin.Email,
+                Role = UserRoles.GetRoleName(UserRoles.Admin),
+                RoleId = UserRoles.Admin,
                 ExpiresAt = DateTime.UtcNow.AddDays(7)
             };
         }
