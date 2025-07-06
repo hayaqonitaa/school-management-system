@@ -2,7 +2,7 @@ namespace SchoolManagementSystem.Modules.Students.Dtos
 {
     public class StudentResponseDTO
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? NISN { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }

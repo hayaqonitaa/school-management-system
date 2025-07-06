@@ -19,7 +19,7 @@ namespace SchoolManagementSystem.Modules.Students.Repositories
             return student;
         }
         
-        public async Task<Student?> GetByIdAsync(int id)
+        public async Task<Student?> GetByIdAsync(Guid id)
         {
             return await _context.Students.FindAsync(id);
         }
@@ -46,7 +46,7 @@ namespace SchoolManagementSystem.Modules.Students.Repositories
             return student;
         }
         
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var student = await GetByIdAsync(id);
             if (student == null) return false;

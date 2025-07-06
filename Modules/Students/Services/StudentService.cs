@@ -1,18 +1,23 @@
 using BCrypt.Net;
+using Microsoft.EntityFrameworkCore;
 using SchoolManagementSystem.Modules.Students.Dtos;
 using SchoolManagementSystem.Modules.Students.Entities;
 using SchoolManagementSystem.Modules.Students.Repositories;
 using SchoolManagementSystem.Modules.Students.Mappers;
+using SchoolManagementSystem.Modules.Users.Entities;
+using SchoolManagementSystem.Common.Constants;
 
 namespace SchoolManagementSystem.Modules.Students.Services
 {
     public class StudentService : IStudentService
     {
         private readonly IStudentRepository _studentRepository;
+        private readonly DatabaseConfig _context;
         
-        public StudentService(IStudentRepository studentRepository)
+        public StudentService(IStudentRepository studentRepository, DatabaseConfig context)
         {
             _studentRepository = studentRepository;
+            _context = context;
         }
         
         public async Task<StudentResponseDTO> CreateStudentAsync(CreateStudentDTO createStudentDTO)
@@ -40,13 +45,38 @@ namespace SchoolManagementSystem.Modules.Students.Services
             // save to database
             var createdStudent = await _studentRepository.CreateAsync(student);
             
+            // create corresponding user record for authentication
+            var user = new User
+            {
+                IdUser = createdStudent.Id,
+                Role = UserRoles.Student
+            };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            
             // return response DTO using mapper
             return createdStudent.ToResponseDTO();
         }
         
-        public async Task<StudentResponseDTO?> GetStudentByIdAsync(int id)
+        public async Task<StudentResponseDTO?> GetStudentByIdAsync(Guid id)
         {
             var student = await _studentRepository.GetByIdAsync(id);
+            if (student == null) return null;
+            
+            return student.ToResponseDTO();
+        }
+        
+        public async Task<StudentResponseDTO?> GetStudentByNISNAsync(string nisn)
+        {
+            var student = await _studentRepository.GetByNISNAsync(nisn);
+            if (student == null) return null;
+            
+            return student.ToResponseDTO();
+        }
+        
+        public async Task<StudentResponseDTO?> GetStudentByEmailAsync(string email)
+        {
+            var student = await _studentRepository.GetByEmailAsync(email);
             if (student == null) return null;
             
             return student.ToResponseDTO();
@@ -58,7 +88,7 @@ namespace SchoolManagementSystem.Modules.Students.Services
             return students.ToResponseDTOList();
         }
         
-        public async Task<StudentResponseDTO> UpdateStudentAsync(int id, CreateStudentDTO updateStudentDTO)
+        public async Task<StudentResponseDTO> UpdateStudentAsync(Guid id, CreateStudentDTO updateStudentDTO)
         {
             var student = await _studentRepository.GetByIdAsync(id);
             if (student == null)
@@ -91,8 +121,17 @@ namespace SchoolManagementSystem.Modules.Students.Services
             return updatedStudent.ToResponseDTO();
         }
         
-        public async Task<bool> DeleteStudentAsync(int id)
+        public async Task<bool> DeleteStudentAsync(Guid id)
         {
+            // Delete associated user record first
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id && u.Role == UserRoles.Student);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+            
+            // Delete student record
             return await _studentRepository.DeleteAsync(id);
         }
     }

@@ -2,7 +2,7 @@ namespace SchoolManagementSystem.Modules.Students.Entities
 {
     public class Student
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public required string NISN { get; set; }
         public required string FullName { get; set; }
         public required string Email { get; set; }
