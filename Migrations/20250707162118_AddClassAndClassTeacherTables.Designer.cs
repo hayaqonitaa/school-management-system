@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace SchoolManagementSystem.Migrations
 {
     [DbContext(typeof(DatabaseConfig))]
-    partial class DatabaseConfigModelSnapshot : ModelSnapshot
+    [Migration("20250707162118_AddClassAndClassTeacherTables")]
+    partial class AddClassAndClassTeacherTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,6 +93,9 @@ namespace SchoolManagementSystem.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -105,14 +111,17 @@ namespace SchoolManagementSystem.Migrations
                     b.Property<int>("Tahun")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TeacherId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdClass");
+                    b.HasIndex("ClassId");
 
-                    b.HasIndex("IdTeacher");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("ClassTeachers");
                 });
@@ -222,13 +231,13 @@ namespace SchoolManagementSystem.Migrations
                 {
                     b.HasOne("SchoolManagementSystem.Modules.Classes.Entities.Class", "Class")
                         .WithMany()
-                        .HasForeignKey("IdClass")
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SchoolManagementSystem.Modules.Teachers.Entities.Teacher", "Teacher")
                         .WithMany()
-                        .HasForeignKey("IdTeacher")
+                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

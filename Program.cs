@@ -9,6 +9,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using SchoolManagementSystem.Modules.Teachers.Services;
 using SchoolManagementSystem.Modules.Teachers.Repositories;
+using SchoolManagementSystem.Modules.Classes.Services;
+using SchoolManagementSystem.Modules.Classes.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,10 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
+builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
+builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtHelper>();
 
