@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using SchoolManagementSystem.Modules.Teachers.Services;
+using SchoolManagementSystem.Modules.Teachers.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,8 @@ builder.Services.AddDbContext<DatabaseConfig>(options =>
 // Register services
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtHelper>();
 

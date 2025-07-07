@@ -11,8 +11,6 @@ namespace SchoolManagementSystem.Modules.Teachers.Services
     {
         Task<TeacherResponseDTO> CreateTeacherAsync(CreateTeacherDTO createTeacherDTO);
         Task<TeacherResponseDTO?> GetTeacherByIdAsync(Guid id);
-        Task<TeacherResponseDTO?> GetTeacherByNIPAsync(string nip);
-        Task<TeacherResponseDTO?> GetTeacherByEmailAsync(string email);
         Task<List<TeacherResponseDTO>> GetAllTeachersAsync();
         Task<TeacherResponseDTO> UpdateTeacherAsync(Guid id, CreateTeacherDTO updateTeacherDTO);
         Task<bool> DeleteTeacherAsync(Guid id);

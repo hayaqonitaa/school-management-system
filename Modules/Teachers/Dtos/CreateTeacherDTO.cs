@@ -7,28 +7,28 @@ namespace SchoolManagementSystem.Modules.Teachers.Dtos
     {
         [Required]
         [StringLength(20)]
-        [DefaultValue("198501012023011001")]
+        [DefaultValue("200402112023011001")]
         public required string NIP { get; set; }
 
         [Required]
         [StringLength(100)]
-        [DefaultValue("Jane Smith")]
+        [DefaultValue("Qonita Amani")]
         public required string FullName { get; set; }
 
         [Required]
         [StringLength(200)]
-        [DefaultValue("Jl. Pendidikan No. 123, Jakarta")]
+        [DefaultValue("Jl. Bukit Indah II No. 12")]
         public required string Alamat { get; set; }
 
         [Required]
         [EmailAddress]
         [StringLength(100)]
-        [DefaultValue("jane.teacher@school.com")]
+        [DefaultValue("qonita.teacher@school.com")]
         public required string Email { get; set; }
 
         [Required]
         [StringLength(255)]
-        [DefaultValue("password123")]
+        [DefaultValue("haya123")]
         public required string Password { get; set; }
         
         [StringLength(15, MinimumLength = 10)]
