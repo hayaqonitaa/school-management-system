@@ -10,11 +10,11 @@ namespace SchoolManagementSystem.Data
     {
         public static async Task SeedAdminUser(DatabaseConfig context)
         {
-            // Check if admin already exists
+
             var existingAdmin = await context.Admins.FirstOrDefaultAsync(a => a.Email == "admin@school.com");
             if (existingAdmin != null) return;
 
-            // Create default admin account
+            // default admin account
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword("Admin123!");
             
             var admin = new Admin
@@ -30,7 +30,7 @@ namespace SchoolManagementSystem.Data
             context.Admins.Add(admin);
             await context.SaveChangesAsync();
 
-            // Create corresponding user record
+            // create user record
             var adminUser = new User
             {
                 IdUser = admin.Id,

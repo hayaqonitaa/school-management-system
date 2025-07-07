@@ -38,16 +38,14 @@ namespace SchoolManagementSystem.Modules.Students.Services
                 throw new ArgumentException("Email already exists");
             }
             
-            // hash password
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(createStudentDTO.Password);
             
-            // create student entity using mapper
             var student = createStudentDTO.ToEntity(hashedPassword);
             
             // save to database
             var createdStudent = await _studentRepository.CreateAsync(student);
             
-            // create corresponding user record for authentication
+            // create user record for authentication
             var user = new User
             {
                 IdUser = createdStudent.Id,
@@ -111,7 +109,7 @@ namespace SchoolManagementSystem.Modules.Students.Services
         
         public async Task<bool> DeleteStudentAsync(Guid id)
         {
-            // Delete associated user record first
+            // delete user record 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id && u.Role == UserRoles.Student);
             if (user != null)
             {
@@ -119,7 +117,7 @@ namespace SchoolManagementSystem.Modules.Students.Services
                 await _context.SaveChangesAsync();
             }
             
-            // Delete student record
+            // delete student record
             return await _studentRepository.DeleteAsync(id);
         }
     }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "5t1V5cgozLE94ZFs/OwDf7av8IwlQLhNk/9Z6f6zAg/riwlway+LNvAVE9pdzOfOfYz9fBm9cYn825PJdVrVDg==",
+  "dgSpecHash": "txJEvgC49k4eQnTVg7zDMYZORfyFrhMsaIu8cHhevX/oeoodOvDAKvisAZId0NLMhGAz/WzFwlNry0LGVmdzug==",
   "success": true,
-  "projectFilePath": "D:\\Semester 5\\school\\SchoolManagementSystem\\SchoolManagementSystem.csproj",
+  "projectFilePath": "D:\\Semester 5\\school2\\school-management-system\\SchoolManagementSystem.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\qonit\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\qonit\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

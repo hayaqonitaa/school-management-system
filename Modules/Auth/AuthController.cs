@@ -33,23 +33,23 @@ namespace SchoolManagementSystem.Modules.Auth
             }
         }
         
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequestDTO registerRequest)
-        {
-            try
-            {
-                var response = await _authService.RegisterAsync(registerRequest);
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        // [HttpPost("register")]
+        // public async Task<IActionResult> Register(RegisterRequestDTO registerRequest)
+        // {
+        //     try
+        //     {
+        //         var response = await _authService.RegisterAsync(registerRequest);
+        //         return Ok(response);
+        //     }
+        //     catch (ArgumentException ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        // }
         
         [HttpPost("admin/login")]
         public async Task<IActionResult> AdminLogin(LoginRequestDTO loginRequest)

@@ -30,7 +30,6 @@ namespace SchoolManagementSystem.Modules.Auth.Services
         
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequest)
         {
-            // Find user by email in Students or Teachers
             Student? student = await _context.Students.FirstOrDefaultAsync(s => s.Email == loginRequest.Email);
             Teacher? teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Email == loginRequest.Email);
             
@@ -39,7 +38,6 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 throw new UnauthorizedAccessException("Invalid email or password");
             }
             
-            // Verify password
             string hashedPassword;
             Guid userId;
             int roleId;
@@ -65,7 +63,7 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 roleId = UserRoles.Teacher;
             }
             
-            // Create or update User record
+            // create or update User 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == userId && u.Role == roleId);
             if (user == null)
             {
@@ -78,7 +76,7 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 await _context.SaveChangesAsync();
             }
             
-            // Generate JWT token
+            // generate JWT token
             var token = _jwtHelper.GenerateToken(user.Id, loginRequest.Email, roleId);
             
             return new LoginResponseDTO
@@ -94,13 +92,12 @@ namespace SchoolManagementSystem.Modules.Auth.Services
         
         public async Task<LoginResponseDTO> RegisterAsync(RegisterRequestDTO registerRequest)
         {
-            // Validate role
             if (!UserRoles.IsValidRole(registerRequest.RoleId))
             {
                 throw new ArgumentException("Invalid role");
             }
             
-            // Check if email already exists
+            // check if email exists
             var existingStudent = await _context.Students.FirstOrDefaultAsync(s => s.Email == registerRequest.Email);
             var existingTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Email == registerRequest.Email);
             
@@ -112,7 +109,7 @@ namespace SchoolManagementSystem.Modules.Auth.Services
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
             Guid createdId;
             
-            // Create Student or Teacher based on role
+            // create Student or Teacher 
             if (registerRequest.RoleId == UserRoles.Student)
             {
                 if (string.IsNullOrEmpty(registerRequest.NISN) || string.IsNullOrEmpty(registerRequest.FullName))
@@ -144,7 +141,7 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 {
                     NIP = registerRequest.NIP,
                     FullName = registerRequest.FullName,
-                    Alamat = registerRequest.Address ?? "", // Fix property name
+                    Alamat = registerRequest.Address ?? "", 
                     Email = registerRequest.Email,
                     Password = hashedPassword,
                     PhoneNumber = registerRequest.PhoneNumber
@@ -159,7 +156,6 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 throw new ArgumentException("Admin registration is not allowed through this endpoint");
             }
             
-            // Create User record
             var user = new User
             {
                 IdUser = createdId,
@@ -168,7 +164,6 @@ namespace SchoolManagementSystem.Modules.Auth.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             
-            // Generate JWT token
             var token = _jwtHelper.GenerateToken(user.Id, registerRequest.Email, registerRequest.RoleId);
             
             return new LoginResponseDTO
@@ -191,13 +186,11 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 throw new UnauthorizedAccessException("Invalid admin credentials");
             }
             
-            // Verify password
             if (!BCrypt.Net.BCrypt.Verify(loginRequest.Password, admin.Password))
             {
                 throw new UnauthorizedAccessException("Invalid admin credentials");
             }
             
-            // Find or create corresponding user record
             var adminUser = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == admin.Id && u.Role == UserRoles.Admin);
             if (adminUser == null)
             {
@@ -210,7 +203,6 @@ namespace SchoolManagementSystem.Modules.Auth.Services
                 await _context.SaveChangesAsync();
             }
             
-            // Generate JWT token with Admin role
             var token = _jwtHelper.GenerateToken(adminUser.Id, admin.Email, UserRoles.Admin);
             
             return new LoginResponseDTO

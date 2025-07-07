@@ -10,7 +10,7 @@ namespace SchoolManagementSystem.Modules.Users.Entities
     public class User
     {
         public int Id { get; set; }
-        public Guid IdUser { get; set; }  // Reference to Student or Teacher ID (now GUID)
+        public Guid IdUser { get; set; }  // Reference to Student or Teacher ID
         public int Role { get; set; }  // 1=Admin, 2=Teacher, 3=Student
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
