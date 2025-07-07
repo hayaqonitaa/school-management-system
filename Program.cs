@@ -11,6 +11,8 @@ using SchoolManagementSystem.Modules.Teachers.Services;
 using SchoolManagementSystem.Modules.Teachers.Repositories;
 using SchoolManagementSystem.Modules.Classes.Services;
 using SchoolManagementSystem.Modules.Classes.Repositories;
+using SchoolManagementSystem.Modules.Enrollments.Services;
+using SchoolManagementSystem.Modules.Enrollments.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,8 @@ builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassTeacherService, ClassTeacherService>();
 builder.Services.AddScoped<IClassTeacherRepository, ClassTeacherRepository>();
+builder.Services.AddScoped<SchoolManagementSystem.Modules.Enrollments.Services.IEnrollmentService, SchoolManagementSystem.Modules.Enrollments.Services.EnrollmentService>();
+builder.Services.AddScoped<SchoolManagementSystem.Modules.Enrollments.Repositories.IEnrollmentRepository, SchoolManagementSystem.Modules.Enrollments.Repositories.EnrollmentRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtHelper>();
 
