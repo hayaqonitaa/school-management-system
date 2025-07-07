@@ -43,7 +43,7 @@ If you want to use your own Supabase database:
 2. Get your connection details from Settings > Database
 3. Update the connection string in `appsettings.json` and `appsettings.Development.json`
 
-### 4. Run Migrations (If using your own database)
+### Run Migrations (If using your own database)
 ```bash
 # Install EF Core tools (if not already installed)
 dotnet tool install --global dotnet-ef
@@ -231,4 +231,30 @@ Content-Type: application/json
 # Delete enrollment (Admin only)
 DELETE /api/enrollments/{id}
 Authorization: Bearer {admin_token}
+```
+
+## Environment Configuration
+
+The application supports environment configuration through `.env` file:
+
+### Current Setup (Ready to Use)
+The project includes a pre-configured `.env` file with shared database credentials. No additional setup required for testing.
+
+### Environment Variables
+The application reads these environment variables:
+
+```properties
+# Environment
+ASPNETCORE_ENVIRONMENT=Development
+
+# Database Configuration
+ConnectionStrings__DefaultConnection=Server=db.wykmilshndgfmrsnbhat.supabase.co;Port=5432;Database=postgres;User Id=postgres;Password=Kucinghitam12;SSL Mode=Require;
+
+# JWT Configuration
+Jwt__Key=SchoolManagementSystemSecretKeyForJWTTokenGeneration123456789
+Jwt__Issuer=SchoolManagementSystem
+Jwt__Audience=SchoolManagementSystem
+
+# Application Settings
+ASPNETCORE_URLS=http://localhost:5037
 ```

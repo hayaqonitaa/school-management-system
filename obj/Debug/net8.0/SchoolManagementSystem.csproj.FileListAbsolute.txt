@@ -346,3 +346,5 @@ D:\Semester 5\school2\school-management-system\obj\Debug\net8.0\refint\SchoolMan
 D:\Semester 5\school2\school-management-system\obj\Debug\net8.0\SchoolManagementSystem.pdb
 D:\Semester 5\school2\school-management-system\obj\Debug\net8.0\SchoolManagementSystem.genruntimeconfig.cache
 D:\Semester 5\school2\school-management-system\obj\Debug\net8.0\ref\SchoolManagementSystem.dll
+D:\Semester 5\school2\school-management-system\bin\Debug\net8.0\DotNetEnv.dll
+D:\Semester 5\school2\school-management-system\bin\Debug\net8.0\Sprache.dll
