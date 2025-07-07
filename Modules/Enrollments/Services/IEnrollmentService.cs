@@ -12,5 +12,16 @@ namespace SchoolManagementSystem.Modules.Enrollments.Services
         Task<EnrollmentResponseDTO?> UpdateEnrollmentAsync(Guid id, CreateEnrollmentDTO updateEnrollmentDto);
         Task<bool> DeleteEnrollmentAsync(Guid id);
         Task<bool> IsStudentEnrolledAsync(Guid studentId, Guid classTeacherId);
+        
+        // Authorization methods
+        Task<bool> IsTeacherAuthorizedForEnrollmentAsync(Guid teacherId, Guid enrollmentId);
+        Task<bool> IsTeacherAuthorizedForStudentAsync(Guid teacherId, Guid studentId);
+        Task<bool> IsTeacherAuthorizedForClassTeacherAsync(Guid teacherId, Guid classTeacherId);
+        Task<List<EnrollmentResponseDTO>> GetEnrollmentsByTeacherIdAsync(Guid teacherId);
+        Task<List<EnrollmentResponseDTO>> GetEnrollmentsByUserIdAsync(int userId, string role);
+        
+        // Helper methods for User ID resolution
+        Task<Guid?> GetTeacherIdFromUserIdAsync(int userId);
+        Task<Guid?> GetStudentIdFromUserIdAsync(int userId);
     }
 }

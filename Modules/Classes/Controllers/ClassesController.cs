@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementSystem.Modules.Classes.Dtos;
 using SchoolManagementSystem.Modules.Classes.Services;
+using System.Security.Claims;
 
 namespace SchoolManagementSystem.Modules.Classes.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class ClassesController : ControllerBase
     {
         private readonly IClassService _classService;
@@ -17,8 +18,8 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             _classService = classService;
         }
 
-        // GET: api/classes
         [HttpGet]
+        [Authorize(Roles = "Admin,Teacher")]
         public async Task<ActionResult<List<ClassResponseDTO>>> GetAllClasses()
         {
             try
@@ -32,8 +33,8 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // GET: api/classes/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Teacher")]
         public async Task<ActionResult<ClassResponseDTO>> GetClassById(Guid id)
         {
             try
@@ -50,23 +51,8 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // GET: api/classes/tingkat/{tingkat}
-        [HttpGet("tingkat/{tingkat}")]
-        public async Task<ActionResult<List<ClassResponseDTO>>> GetClassesByTingkat(int tingkat)
-        {
-            try
-            {
-                var classes = await _classService.GetClassesByTingkatAsync(tingkat);
-                return Ok(classes);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An error occurred while retrieving classes by tingkat.", details = ex.Message });
-            }
-        }
-
-        // POST: api/classes
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ClassResponseDTO>> CreateClass([FromBody] CreateClassDTO createClassDto)
         {
             try
@@ -84,8 +70,8 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // PUT: api/classes/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ClassResponseDTO>> UpdateClass(Guid id, [FromBody] CreateClassDTO updateClassDto)
         {
             try
@@ -106,8 +92,8 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // DELETE: api/classes/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> DeleteClass(Guid id)
         {
             try
