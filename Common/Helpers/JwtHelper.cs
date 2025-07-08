@@ -8,17 +8,10 @@ namespace SchoolManagementSystem.Common.Helpers
 {
     public class JwtHelper
     {
-        private readonly IConfiguration _configuration;
-        
-        public JwtHelper(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-        
         public string GenerateToken(int userId, string email, int roleId)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+            var key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!);
             
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -30,8 +23,8 @@ namespace SchoolManagementSystem.Common.Helpers
                     new Claim("RoleId", roleId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
-                Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"],
+                Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
+                Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             
@@ -44,16 +37,16 @@ namespace SchoolManagementSystem.Common.Helpers
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+                var key = Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!);
                 
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
                     ValidateAudience = true,
-                    ValidAudience = _configuration["Jwt:Audience"],
+                    ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
                 

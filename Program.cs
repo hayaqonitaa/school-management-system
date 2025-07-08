@@ -13,13 +13,19 @@ using SchoolManagementSystem.Modules.Classes.Services;
 using SchoolManagementSystem.Modules.Classes.Repositories;
 using SchoolManagementSystem.Modules.Enrollments.Services;
 using SchoolManagementSystem.Modules.Enrollments.Repositories;
+using DotNetEnv;
+
+// Load environment variables from .env file
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Database
+// Configure Database with environment variables
+var connectionString = $"Host={Environment.GetEnvironmentVariable("DB_HOST")};Port={Environment.GetEnvironmentVariable("DB_PORT")};Database={Environment.GetEnvironmentVariable("DB_NAME")};Username={Environment.GetEnvironmentVariable("DB_USERNAME")};Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};Pooling=true;SSL Mode=Require;";
+
 builder.Services.AddDbContext<DatabaseConfig>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(connectionString);
 });
 
 // Add services to the container.
@@ -85,11 +91,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
