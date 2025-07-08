@@ -7,6 +7,32 @@ A comprehensive school management system built with ASP.NET Core 8.0, featuring 
 - .NET 8.0 SDK
 - Visual Studio Code or Visual Studio 2022
 
+## Required NuGet Packages
+
+This project includes all necessary packages. If you're creating a similar project from scratch, you'll need:
+
+```bash
+# Entity Framework Core for PostgreSQL
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL
+
+# JWT Authentication
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+
+# Password Hashing
+dotnet add package BCrypt.Net-Next
+
+# Environment Variables Support
+dotnet add package DotNetEnv
+
+# API Documentation (Swagger)
+dotnet add package Microsoft.AspNetCore.OpenApi
+dotnet add package Swashbuckle.AspNetCore
+```
+
+**Note:** All packages are already installed in this project.
+
 
 ## How to Run Locally
 
@@ -34,14 +60,21 @@ That's it! The application will be available at:
 
 ### Quick Start (Recommended)
 
-**Database is already configured in `appsettings.json`** - No setup needed!
+**Database is already configured in `.env` file** - No setup needed!
 
 ### Alternative: Use Your Own Database
 If you want to use your own Supabase database:
 
 1. Create a Supabase project at https://supabase.com
 2. Get your connection details from Settings > Database
-3. Update the connection string in `appsettings.json` and `appsettings.Development.json`
+3. Update the environment variables in `.env` file:
+   ```env
+   DB_HOST=your-supabase-host
+   DB_PORT=5432
+   DB_NAME=postgres
+   DB_USERNAME=your-username
+   DB_PASSWORD=your-password
+   ```
 
 ### Run Migrations (If using your own database)
 ```bash
@@ -235,26 +268,26 @@ Authorization: Bearer {admin_token}
 
 ## Environment Configuration
 
-The application supports environment configuration through `.env` file:
+The application uses environment variables for configuration through a `.env` file for better security and flexibility.
 
-### Current Setup (Ready to Use)
-The project includes a pre-configured `.env` file with shared database credentials. No additional setup required for testing.
+### Setup Environment Variables
 
-### Environment Variables
-The application reads these environment variables:
+1. **Copy the example file:**
+```bash
+cp .env.example .env
+```
 
-```properties
-# Environment
-ASPNETCORE_ENVIRONMENT=Development
-
+2. **Update the `.env` file with your configuration:**
+```env
 # Database Configuration
-ConnectionStrings__DefaultConnection=Server=db.wykmilshndgfmrsnbhat.supabase.co;Port=5432;Database=postgres;User Id=postgres;Password=Kucinghitam12;SSL Mode=Require;
+DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
+DB_PORT=5432
+DB_NAME=postgres
+DB_USERNAME=postgres.wykmilshndgfmrsnbhat
+DB_PASSWORD=Kucinghitam12
 
 # JWT Configuration
-Jwt__Key=SchoolManagementSystemSecretKeyForJWTTokenGeneration123456789
-Jwt__Issuer=SchoolManagementSystem
-Jwt__Audience=SchoolManagementSystem
-
-# Application Settings
-ASPNETCORE_URLS=http://localhost:5037
+JWT_KEY=SchoolManagementSystemSecretKeyForJWTTokenGeneration123456789
+JWT_ISSUER=SchoolManagementSystem
+JWT_AUDIENCE=SchoolManagementSystem
 ```
