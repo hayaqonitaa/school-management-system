@@ -16,20 +16,11 @@ using SchoolManagementSystem.Modules.Enrollments.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load .env file
-var root = Directory.GetCurrentDirectory();
-var dotenv = Path.Combine(root, ".env");
-if (File.Exists(dotenv))
+// Configure Database
+builder.Services.AddDbContext<DatabaseConfig>(options =>
 {
-    DotNetEnv.Env.Load(dotenv);
-}
-
-// Update configuration to use environment variables
-builder.Configuration.AddEnvironmentVariables();
-
-// Update connection string to use .env
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") ?? 
-                      builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -72,9 +63,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database configuration (menginject DatabaseConfig)
-builder.Services.AddDbContext<DatabaseConfig>(options =>
-    options.UseNpgsql(connectionString));
 
 // Register services
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
