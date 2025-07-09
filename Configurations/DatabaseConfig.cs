@@ -20,50 +20,6 @@ public class DatabaseConfig : DbContext
     public DbSet<ClassTeacher> ClassTeachers { get; set; }
     public DbSet<Enrollment> Enrollments { get; set; }
 
-    public override int SaveChanges()
-    {
-        var entries = ChangeTracker.Entries()
-            .Where(e => (e.Entity is Student || e.Entity is Teacher || e.Entity is User || e.Entity is Admin || e.Entity is Class || e.Entity is ClassTeacher || e.Entity is Enrollment) && (
-                e.State == EntityState.Added || e.State == EntityState.Modified));
-
-        foreach (var entityEntry in entries)
-        {
-            if (entityEntry.Entity is Student student)
-            {
-                student.UpdatedAt = DateTime.UtcNow;
-                if (entityEntry.State == EntityState.Added)
-                {
-                    student.CreatedAt = DateTime.UtcNow;
-                }
-            }
-            else if (entityEntry.Entity is Teacher teacher)
-            {
-                teacher.UpdatedAt = DateTime.UtcNow;
-                if (entityEntry.State == EntityState.Added)
-                {
-                    teacher.CreatedAt = DateTime.UtcNow;
-                }
-            }
-            else if (entityEntry.Entity is User user)
-            {
-                user.UpdatedAt = DateTime.UtcNow;
-                if (entityEntry.State == EntityState.Added)
-                {
-                    user.CreatedAt = DateTime.UtcNow;
-                }
-            }
-            else if (entityEntry.Entity is Admin admin)
-            {
-                admin.UpdatedAt = DateTime.UtcNow;
-                if (entityEntry.State == EntityState.Added)
-                {
-                    admin.CreatedAt = DateTime.UtcNow;
-                }
-            }
-        }
-
-        return base.SaveChanges();
-    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -158,14 +114,12 @@ public class DatabaseConfig : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Configure Enrollment
         modelBuilder.Entity<Enrollment>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.IdStudent).IsRequired();
             entity.Property(e => e.IdClassTeacher).IsRequired();
             
-            // Configure relationships
             entity.HasOne(e => e.Student)
                 .WithMany()
                 .HasForeignKey(e => e.IdStudent)
@@ -176,7 +130,7 @@ public class DatabaseConfig : DbContext
                 .HasForeignKey(e => e.IdClassTeacher)
                 .OnDelete(DeleteBehavior.Cascade);
                 
-            // One student can only be enrolled in one class (unique student constraint)
+            // 1 student 1 class
             entity.HasIndex(e => e.IdStudent)
                 .IsUnique()
                 .HasDatabaseName("IX_Enrollment_OneStudentOneClass");

@@ -186,11 +186,4 @@ namespace SchoolManagementSystem.Modules.Enrollments.Controllers
             }
         }
     }
-
-    // Helper DTO for enroll endpoint
-    public class EnrollStudentRequestDTO
-    {
-        public Guid IdStudent { get; set; }
-        public Guid IdClassTeacher { get; set; }
-    }
 }

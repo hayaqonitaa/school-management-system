@@ -18,7 +18,6 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             _classTeacherService = classTeacherService;
         }
 
-        // GET: api/classteachers
         [HttpGet]
         public async Task<ActionResult<List<ClassTeacherResponseDTO>>> GetAllClassTeachers()
         {
@@ -35,8 +34,7 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
 
        
 
-        // POST: api/classteachers/assign
-        [HttpPost("newTeacher")]
+        [HttpPost]
         public async Task<ActionResult<ClassTeacherResponseDTO>> AssignTeacherToClass([FromBody] AssignTeacherRequestDTO assignRequest)
         {
             try
@@ -59,7 +57,6 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // PUT: api/classteachers/{id}
         [HttpPut("{id}")]
         public async Task<ActionResult<ClassTeacherResponseDTO>> UpdateClassTeacher(Guid id, [FromBody] CreateClassTeacherDTO updateClassTeacherDto)
         {
@@ -81,7 +78,6 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // PUT: api/classteachers/{id}/unassign
         [HttpPut("{id}/unassign")]
         public async Task<ActionResult> UnassignTeacherFromClass(Guid id)
         {
@@ -99,7 +95,6 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // PUT: api/classteachers/{id}/assign
         [HttpPut("{id}/assign")]
         public async Task<ActionResult> AssignTeacherFromClass(Guid id)
         {
@@ -117,7 +112,6 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        // DELETE: api/classteachers/{id}
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteClassTeacher(Guid id)
         {

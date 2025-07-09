@@ -28,7 +28,6 @@ dotnet add package DotNetEnv
 
 # API Documentation (Swagger)
 dotnet add package Microsoft.AspNetCore.OpenApi
-dotnet add package Swashbuckle.AspNetCore
 ```
 
 **Note:** All packages are already installed in this project.
@@ -160,13 +159,11 @@ Authorization: Bearer {admin_token}
 Content-Type: application/json
 
 {
+  "nisn": "1234567890",
   "fullName": "John Doe",
-  "email": "john.doe@student.com",
-  "dateOfBirth": "2005-05-15",
-  "phoneNumber": "1234567890",
-  "address": "123 Main St",
-  "guardianName": "Jane Doe",
-  "guardianPhoneNumber": "0987654321"
+  "email": "john@example.com",
+  "password": "password123",
+  "phoneNumber": "081234567890"
 }
 ```
 
@@ -183,11 +180,11 @@ Content-Type: application/json
 
 {
   "nip": "200402112023011001",
-  "fullName": "Dr. Smith",
-  "alamat": "456 Teacher St",
-  "email": "dr.smith@school.com",
-  "password": "teacher123",
-  "phoneNumber": "5555555555"
+  "fullName": "Qonita Amani",
+  "alamat": "Jl. Bukit Indah II No. 12",
+  "email": "qonita.teacher@school.com",
+  "password": "haya123",
+  "phoneNumber": "081234567890"
 }
 ```
 
@@ -204,8 +201,7 @@ Content-Type: application/json
 
 {
   "kelas": "10A",
-  "tingkat": 10,
-  "capacity": 30
+  "tingkat": 10
 }
 ```
 
