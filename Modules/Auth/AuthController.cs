@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementSystem.Modules.Auth.Dtos;
 using SchoolManagementSystem.Modules.Auth.Services;
+using SchoolManagementSystem.Common.Models;
+using SchoolManagementSystem.Common.Helpers;
 
 namespace SchoolManagementSystem.Modules.Auth
 {
@@ -21,15 +23,15 @@ namespace SchoolManagementSystem.Modules.Auth
             try
             {
                 var response = await _authService.LoginAsync(loginRequest);
-                return Ok(response);
+                return Ok(ApiResponseHelper.Success(response, "Login successful."));
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status401Unauthorized));
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status400BadRequest));
             }
         }
         
@@ -57,15 +59,15 @@ namespace SchoolManagementSystem.Modules.Auth
             try
             {
                 var response = await _authService.LoginAdminAsync(loginRequest);
-                return Ok(response);
+                return Ok(ApiResponseHelper.Success(response, "Admin login successful."));
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { message = ex.Message });
+                return Unauthorized(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status401Unauthorized));
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status400BadRequest));
             }
         }
     }

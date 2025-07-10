@@ -6,6 +6,7 @@ namespace SchoolManagementSystem.Modules.Classes.Services
     public interface IClassTeacherService
     {
         Task<List<ClassTeacherResponseDTO>> GetAllClassTeachersAsync();
+        Task<(List<ClassTeacherResponseDTO> classTeachers, int totalCount)> GetAllClassTeachersPaginatedAsync(int page, int pageSize);
         Task<ClassTeacherResponseDTO?> GetClassTeacherByIdAsync(Guid id);
         Task<List<ClassTeacherResponseDTO>> GetByTeacherIdAsync(Guid teacherId);
         Task<List<ClassTeacherResponseDTO>> GetByClassIdAsync(Guid classId);

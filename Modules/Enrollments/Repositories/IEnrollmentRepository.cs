@@ -5,6 +5,7 @@ namespace SchoolManagementSystem.Modules.Enrollments.Repositories
     public interface IEnrollmentRepository
     {
         Task<List<Enrollment>> GetAllAsync();
+        Task<(List<Enrollment> enrollments, int totalCount)> GetAllPaginatedAsync(int page, int pageSize);
         Task<Enrollment?> GetByIdAsync(Guid id);
         Task<List<Enrollment>> GetByStudentIdAsync(Guid studentId);
         Task<List<Enrollment>> GetByClassTeacherIdAsync(Guid classTeacherId);

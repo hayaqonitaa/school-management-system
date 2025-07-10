@@ -30,6 +30,34 @@ namespace SchoolManagementSystem.Modules.Enrollments.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(List<Enrollment> enrollments, int totalCount)> GetAllPaginatedAsync(int page, int pageSize)
+        {
+            var offset = (page - 1) * pageSize;
+            
+            // Get total count
+            var totalCount = await _context.Enrollments.CountAsync();
+
+            // Get paginated data
+            var enrollments = await _context.Enrollments
+                .FromSqlRaw(@"
+                    SELECT e.*, s.*, ct.*, t.*, c.* 
+                    FROM ""Enrollments"" e 
+                    LEFT JOIN ""Students"" s ON e.""IdStudent"" = s.""Id""
+                    LEFT JOIN ""ClassTeachers"" ct ON e.""IdClassTeacher"" = ct.""Id""
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id""
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id""
+                    ORDER BY e.""CreatedAt"" DESC 
+                    OFFSET {0} LIMIT {1}", offset, pageSize)
+                .Include(e => e.Student)
+                .Include(e => e.ClassTeacher)
+                    .ThenInclude(ct => ct.Teacher)
+                .Include(e => e.ClassTeacher)
+                    .ThenInclude(ct => ct.Class)
+                .ToListAsync();
+
+            return (enrollments, totalCount);
+        }
+
         public async Task<Enrollment?> GetByIdAsync(Guid id)
         {
             return await _context.Enrollments

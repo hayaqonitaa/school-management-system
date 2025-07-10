@@ -5,6 +5,7 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
     public interface IClassTeacherRepository
     {
         Task<List<ClassTeacher>> GetAllAsync();
+        Task<(List<ClassTeacher> classTeachers, int totalCount)> GetAllPaginatedAsync(int page, int pageSize);
         Task<ClassTeacher?> GetByIdAsync(Guid id);
         Task<List<ClassTeacher>> GetByTeacherIdAsync(Guid teacherId);
         Task<List<ClassTeacher>> GetByClassIdAsync(Guid classId);

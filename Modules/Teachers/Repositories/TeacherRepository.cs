@@ -33,6 +33,23 @@ namespace SchoolManagementSystem.Modules.Teachers.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(List<Teacher> teachers, int totalCount)> GetAllPaginatedAsync(int page, int pageSize)
+        {
+            var offset = (page - 1) * pageSize;
+            
+            // Get total count
+            var totalCount = await _context.Teachers
+                .FromSqlRaw("SELECT COUNT(*) FROM \"Teachers\"")
+                .CountAsync();
+
+            // Get paginated data
+            var teachers = await _context.Teachers
+                .FromSqlRaw("SELECT * FROM \"Teachers\" ORDER BY \"CreatedAt\" DESC OFFSET {0} LIMIT {1}", offset, pageSize)
+                .ToListAsync();
+
+            return (teachers, totalCount);
+        }
+
         public async Task<Teacher> UpdateAsync(Teacher teacher)
         {
             _context.Teachers.Update(teacher);

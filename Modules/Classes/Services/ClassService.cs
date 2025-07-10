@@ -1,6 +1,7 @@
 using SchoolManagementSystem.Modules.Classes.Dtos;
 using SchoolManagementSystem.Modules.Classes.Repositories;
 using SchoolManagementSystem.Modules.Classes.Mappers;
+using SchoolManagementSystem.Common.Models;
 
 namespace SchoolManagementSystem.Modules.Classes.Services
 {
@@ -17,6 +18,13 @@ namespace SchoolManagementSystem.Modules.Classes.Services
         {
             var classes = await _classRepository.GetAllAsync();
             return classes.ToResponseDTOList();
+        }
+
+        public async Task<(List<ClassResponseDTO> classes, int totalCount)> GetAllClassesPaginatedAsync(int page, int pageSize)
+        {
+            var (classes, totalCount) = await _classRepository.GetAllPaginatedAsync(page, pageSize);
+            var classDTOs = classes.ToResponseDTOList();
+            return (classDTOs, totalCount);
         }
 
         public async Task<ClassResponseDTO?> GetClassByIdAsync(Guid id)

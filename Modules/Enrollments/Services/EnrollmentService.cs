@@ -34,6 +34,13 @@ namespace SchoolManagementSystem.Modules.Enrollments.Services
             return enrollments.ToResponseDTOList();
         }
 
+        public async Task<(List<EnrollmentResponseDTO> enrollments, int totalCount)> GetAllEnrollmentsPaginatedAsync(int page, int pageSize)
+        {
+            var (enrollments, totalCount) = await _enrollmentRepository.GetAllPaginatedAsync(page, pageSize);
+            var enrollmentDTOs = enrollments.ToResponseDTOList();
+            return (enrollmentDTOs, totalCount);
+        }
+
         public async Task<EnrollmentResponseDTO?> GetEnrollmentByIdAsync(Guid id)
         {
             var enrollment = await _enrollmentRepository.GetByIdAsync(id);

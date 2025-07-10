@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolManagementSystem.Modules.Classes.Dtos;
 using SchoolManagementSystem.Modules.Classes.Services;
 using SchoolManagementSystem.Modules.Classes.Entities;
+using SchoolManagementSystem.Common.Models;
+using SchoolManagementSystem.Common.Helpers;
 
 namespace SchoolManagementSystem.Modules.Classes.Controllers
 {
@@ -19,23 +21,63 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ClassTeacherResponseDTO>>> GetAllClassTeachers()
+        public async Task<ActionResult<ApiResponse<List<ClassTeacherResponseDTO>>>> GetAllClassTeachers()
         {
             try
             {
                 var classTeachers = await _classTeacherService.GetAllClassTeachersAsync();
-                return Ok(classTeachers);
+                var response = ApiResponseHelper.Success(classTeachers, $"{classTeachers.Count} class teachers retrieved successfully.");
+                return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving class teachers.", details = ex.Message });
+                var response = ApiResponseHelper.Error<List<ClassTeacherResponseDTO>>("An error occurred while retrieving class teachers.", 500);
+                return StatusCode(500, response);
             }
         }
 
-       
+        [HttpGet("paginated")]
+        public async Task<ActionResult<ApiResponse<List<ClassTeacherResponseDTO>>>> GetAllClassTeachersPaginated(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var (classTeachers, totalCount) = await _classTeacherService.GetAllClassTeachersPaginatedAsync(page, pageSize);
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                var paginationMetadata = new PaginationMetadata
+                {
+                    Page = page,
+                    Size = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    HasPrevious = page > 1,
+                    HasNext = page < totalPages
+                };
+
+                var response = new ApiResponse<List<ClassTeacherResponseDTO>>
+                {
+                    Success = true,
+                    Message = $"{classTeachers.Count} class teachers retrieved successfully.",
+                    Data = classTeachers,
+                    StatusCode = 200,
+                    Pagination = paginationMetadata
+                };
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                var response = ApiResponseHelper.Error<List<ClassTeacherResponseDTO>>("An error occurred while retrieving the class teachers.", 500);
+                return StatusCode(500, response);
+            }
+        }
 
         [HttpPost]
-        public async Task<ActionResult<ClassTeacherResponseDTO>> AssignTeacherToClass([FromBody] AssignTeacherRequestDTO assignRequest)
+        public async Task<ActionResult<ApiResponse<ClassTeacherResponseDTO>>> AssignTeacherToClass([FromBody] AssignTeacherRequestDTO assignRequest)
         {
             try
             {
@@ -43,89 +85,101 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
                     assignRequest.IdTeacher, assignRequest.IdClass, assignRequest.Tahun);
                 
                 if (classTeacher == null)
-                    return BadRequest(new { message = "Failed to assign teacher to class" });
+                {
+                    var errorResponse = ApiResponseHelper.Error<ClassTeacherResponseDTO>("Failed to assign teacher to class", 400);
+                    return BadRequest(errorResponse);
+                }
 
-                return Ok(classTeacher);
+                var response = ApiResponseHelper.Success(classTeacher, "Teacher assigned to class successfully.", 201);
+                return StatusCode(201, response);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ApiResponseHelper.Error<ClassTeacherResponseDTO>(ex.Message, 400);
+                return BadRequest(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while assigning teacher to class.", details = ex.Message });
+                var response = ApiResponseHelper.Error<ClassTeacherResponseDTO>("An error occurred while assigning teacher to class.", 500);
+                return StatusCode(500, response);
             }
         }
 
         [HttpPatch("{id}")]
-        public async Task<ActionResult<ClassTeacherResponseDTO>> UpdateClassTeacher(Guid id, [FromBody] CreateClassTeacherDTO updateClassTeacherDto)
+        public async Task<ActionResult<ApiResponse<ClassTeacherResponseDTO>>> UpdateClassTeacher(Guid id, [FromBody] CreateClassTeacherDTO updateClassTeacherDto)
         {
             try
             {
                 var classTeacher = await _classTeacherService.UpdateClassTeacherAsync(id, updateClassTeacherDto);
                 if (classTeacher == null)
-                    return NotFound(new { message = "Class teacher assignment not found" });
+                {
+                    var notFoundResponse = ApiResponseHelper.Error<ClassTeacherResponseDTO>("Class teacher assignment not found", 404);
+                    return NotFound(notFoundResponse);
+                }
 
-                return Ok(classTeacher);
+                var response = ApiResponseHelper.Success(classTeacher, "Class teacher assignment updated successfully.");
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ApiResponseHelper.Error<ClassTeacherResponseDTO>(ex.Message, 400);
+                return BadRequest(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while updating the class teacher assignment.", details = ex.Message });
+                var response = ApiResponseHelper.Error<ClassTeacherResponseDTO>("An error occurred while updating the class teacher assignment.", 500);
+                return StatusCode(500, response);
             }
         }
 
-        [HttpPut("{id}/unassign")]
-        public async Task<ActionResult> UnassignTeacherFromClass(Guid id)
+        [HttpPatch("{id}/unassign")]
+        public async Task<ActionResult<ApiResponse<object>>> UnassignTeacherFromClass(Guid id)
         {
             try
             {
                 var result = await _classTeacherService.UnassignTeacherFromClassAsync(id);
                 if (!result)
-                    return NotFound(new { message = "Class teacher assignment not found" });
+                    return NotFound(ApiResponseHelper.Error<object>("Class teacher assignment not found", StatusCodes.Status404NotFound));
 
-                return Ok(new { message = "Teacher unassigned successfully" });
+                return Ok(ApiResponseHelper.Success<object>(new { }, "Teacher unassigned successfully."));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while unassigning teacher from class.", details = ex.Message });
+                return StatusCode(500, ApiResponseHelper.Error<object>("An error occurred while unassigning teacher from class.", StatusCodes.Status500InternalServerError));
             }
         }
 
-        [HttpPut("{id}/assign")]
-        public async Task<ActionResult> AssignTeacherFromClass(Guid id)
+        [HttpPatch("{id}/assign")]
+        public async Task<ActionResult<ApiResponse<object>>> AssignTeacherFromClass(Guid id)
         {
             try
             {
                 var result = await _classTeacherService.AssignTeacherFromClassAsync(id);
                 if (!result)
-                    return NotFound(new { message = "Class teacher assignment not found" });
+                    return NotFound(ApiResponseHelper.Error<object>("Class teacher assignment not found", StatusCodes.Status404NotFound));
 
-                return Ok(new { message = "Teacher assigned successfully" });
+                return Ok(ApiResponseHelper.Success<object>(new { }, "Teacher assigned successfully."));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while assigning teacher to class.", details = ex.Message });
+                return StatusCode(500, ApiResponseHelper.Error<object>("An error occurred while assigning teacher to class.", StatusCodes.Status500InternalServerError));
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteClassTeacher(Guid id)
+        public async Task<ActionResult<ApiResponse<object>>> DeleteClassTeacher(Guid id)
         {
             try
             {
                 var result = await _classTeacherService.DeleteClassTeacherAsync(id);
                 if (!result)
-                    return NotFound(new { message = "Class teacher assignment not found" });
+                    return NotFound(ApiResponseHelper.Error<object>("Class teacher assignment not found", StatusCodes.Status404NotFound));
 
-                return Ok(new { message = "Class teacher assignment deleted successfully" });
+                return Ok(ApiResponseHelper.Success<object>(new { }, "Class teacher assignment deleted successfully."));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while deleting the class teacher assignment.", details = ex.Message });
+                return StatusCode(500, ApiResponseHelper.Error<object>("An error occurred while deleting the class teacher assignment.", StatusCodes.Status500InternalServerError));
             }
         }
     }

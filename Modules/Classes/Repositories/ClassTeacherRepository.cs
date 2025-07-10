@@ -25,6 +25,29 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
                 .ToListAsync();
         }
 
+        public async Task<(List<ClassTeacher> classTeachers, int totalCount)> GetAllPaginatedAsync(int page, int pageSize)
+        {
+            var offset = (page - 1) * pageSize;
+            
+            // Get total count
+            var totalCount = await _context.ClassTeachers.CountAsync();
+
+            // Get paginated data
+            var classTeachers = await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id""
+                    ORDER BY ct.""CreatedAt"" DESC 
+                    OFFSET {0} LIMIT {1}", offset, pageSize)
+                .Include(ct => ct.Teacher)
+                .Include(ct => ct.Class)
+                .ToListAsync();
+
+            return (classTeachers, totalCount);
+        }
+
         public async Task<ClassTeacher?> GetByIdAsync(Guid id)
         {
             return await _context.ClassTeachers

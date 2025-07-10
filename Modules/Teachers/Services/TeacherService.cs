@@ -6,6 +6,7 @@ using SchoolManagementSystem.Modules.Teachers.Entities;
 using SchoolManagementSystem.Modules.Teachers.Repositories;
 using SchoolManagementSystem.Modules.Users.Entities;
 using SchoolManagementSystem.Modules.Teachers.Mappers;
+using SchoolManagementSystem.Common.Models;
 
 namespace SchoolManagementSystem.Modules.Teachers.Services
 {
@@ -64,6 +65,13 @@ namespace SchoolManagementSystem.Modules.Teachers.Services
         {
             var teachers = await _teacherRepostory.GetAllAsync();
             return teachers.ToResponseDTOList();
+        }
+
+        public async Task<(List<TeacherResponseDTO> teachers, int totalCount)> GetAllTeachersPaginatedAsync(int page, int pageSize)
+        {
+            var (teachers, totalCount) = await _teacherRepostory.GetAllPaginatedAsync(page, pageSize);
+            var teacherDTOs = teachers.ToResponseDTOList();
+            return (teacherDTOs, totalCount);
         }
 
         public async Task<TeacherResponseDTO> UpdateTeacherAsync(Guid id, CreateTeacherDTO updateTeacherDTO)

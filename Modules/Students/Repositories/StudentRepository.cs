@@ -51,5 +51,28 @@ namespace SchoolManagementSystem.Modules.Students.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<(List<Student> students, int totalCount)> GetAllPaginatedAsync(int page, int size)
+        {
+            var offset = (page - 1) * size;
+            
+            // Get total count using CountAsync
+            var totalCount = await _context.Students.CountAsync();
+            
+            // Get paginated data
+            var students = await _context.Students
+                .FromSqlRaw("SELECT * FROM \"Students\" ORDER BY \"CreatedAt\" DESC OFFSET {0} LIMIT {1}", offset, size)
+                .ToListAsync();
+                
+            return (students, totalCount);
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            var result = await _context.Database
+                .SqlQueryRaw<int>("SELECT COUNT(*) FROM \"Students\"")
+                .FirstAsync();
+            return result;
+        }
     }
 }

@@ -29,6 +29,13 @@ namespace SchoolManagementSystem.Modules.Classes.Services
             return classTeachers.ToResponseDTOList();
         }
 
+        public async Task<(List<ClassTeacherResponseDTO> classTeachers, int totalCount)> GetAllClassTeachersPaginatedAsync(int page, int pageSize)
+        {
+            var (classTeachers, totalCount) = await _classTeacherRepository.GetAllPaginatedAsync(page, pageSize);
+            var classTeacherDTOs = classTeachers.ToResponseDTOList();
+            return (classTeacherDTOs, totalCount);
+        }
+
         public async Task<ClassTeacherResponseDTO?> GetClassTeacherByIdAsync(Guid id)
         {
             var classTeacher = await _classTeacherRepository.GetByIdAsync(id);

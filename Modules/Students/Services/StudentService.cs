@@ -120,5 +120,12 @@ namespace SchoolManagementSystem.Modules.Students.Services
             // delete student record
             return await _studentRepository.DeleteAsync(id);
         }
+
+        public async Task<(List<StudentResponseDTO> students, int totalCount)> GetAllStudentsPaginatedAsync(int page, int size)
+        {
+            var (students, totalCount) = await _studentRepository.GetAllPaginatedAsync(page, size);
+            var studentDTOs = students.ToResponseDTOList();
+            return (studentDTOs, totalCount);
+        }
     }
 }

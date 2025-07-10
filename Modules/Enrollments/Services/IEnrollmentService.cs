@@ -5,6 +5,7 @@ namespace SchoolManagementSystem.Modules.Enrollments.Services
     public interface IEnrollmentService
     {
         Task<List<EnrollmentResponseDTO>> GetAllEnrollmentsAsync();
+        Task<(List<EnrollmentResponseDTO> enrollments, int totalCount)> GetAllEnrollmentsPaginatedAsync(int page, int pageSize);
         Task<EnrollmentResponseDTO?> GetEnrollmentByIdAsync(Guid id);
         Task<List<EnrollmentResponseDTO>> GetEnrollmentsByStudentIdAsync(Guid studentId);
         Task<List<EnrollmentResponseDTO>> GetEnrollmentsByClassTeacherIdAsync(Guid classTeacherId);

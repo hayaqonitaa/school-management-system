@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagementSystem.Modules.Students.Dtos;
 using SchoolManagementSystem.Modules.Students.Services;
+using SchoolManagementSystem.Common.Models;
+using SchoolManagementSystem.Common.Helpers;
 
 namespace SchoolManagementSystem.Modules.Students
 {
@@ -18,94 +20,149 @@ namespace SchoolManagementSystem.Modules.Students
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<StudentResponseDTO>> CreateStudent([FromBody] CreateStudentDTO createStudentDto)
+        public async Task<ActionResult<ApiResponse<StudentResponseDTO>>> CreateStudent([FromBody] CreateStudentDTO createStudentDto)
         {
             try
             {
                 var student = await _studentService.CreateStudentAsync(createStudentDto);
-                return CreatedAtAction(nameof(GetStudentById), new { id = student.Id }, student);
+                var response = ApiResponseHelper.Success(student, "Student created successfully", 201);
+                return StatusCode(201, response);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ApiResponseHelper.Error<StudentResponseDTO>(ex.Message, 400);
+                return BadRequest(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while creating the student.", details = ex.Message });
+                var response = ApiResponseHelper.Error<StudentResponseDTO>("An error occurred while creating the student.", 500);
+                return StatusCode(500, response);
             }
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<StudentResponseDTO>> GetStudentById(Guid id)
+        public async Task<ActionResult<ApiResponse<StudentResponseDTO>>> GetStudentById(Guid id)
         {
             try
             {
                 var student = await _studentService.GetStudentByIdAsync(id);
                 if (student == null)
                 {
-                    return NotFound(new { message = "Student not found." });
+                    var notFoundResponse = ApiResponseHelper.Error<StudentResponseDTO>("Student not found.", 404);
+                    return NotFound(notFoundResponse);
                 }
-                return Ok(student);
+                var response = ApiResponseHelper.Success(student, "Student retrieved successfully");
+                return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving the student.", details = ex.Message });
+                var response = ApiResponseHelper.Error<StudentResponseDTO>("An error occurred while retrieving the student.", 500);
+                return StatusCode(500, response);
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<StudentResponseDTO>>> GetAllStudents()
+        public async Task<ActionResult<ApiResponse<List<StudentResponseDTO>>>> GetAllStudents()
         {
             try
             {
                 var students = await _studentService.GetAllStudentsAsync();
-                return Ok(students);
+                var response = ApiResponseHelper.Success(students, $"{students.Count} students retrieved successfully.");
+                return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving students.", details = ex.Message });
+                var response = ApiResponseHelper.Error<List<StudentResponseDTO>>("An error occurred while retrieving students.", 500);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("paginated")]
+        public async Task<ActionResult<ApiResponse<List<StudentResponseDTO>>>> GetAllStudentsPaginated(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var (students, totalCount) = await _studentService.GetAllStudentsPaginatedAsync(page, pageSize);
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                var paginationMetadata = new PaginationMetadata
+                {
+                    Page = page,
+                    Size = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    HasPrevious = page > 1,
+                    HasNext = page < totalPages
+                };
+
+                var response = new ApiResponse<List<StudentResponseDTO>>
+                {
+                    Success = true,
+                    Message = $"{students.Count} students retrieved successfully.",
+                    Data = students,
+                    StatusCode = 200,
+                    Pagination = paginationMetadata
+                };
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                var response = ApiResponseHelper.Error<List<StudentResponseDTO>>("An error occurred while retrieving students.", 500);
+                return StatusCode(500, response);
             }
         }
 
         [HttpPatch("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<StudentResponseDTO>> UpdateStudent(Guid id, [FromBody] CreateStudentDTO updateStudentDto)
+        public async Task<ActionResult<ApiResponse<StudentResponseDTO>>> UpdateStudent(Guid id, [FromBody] CreateStudentDTO updateStudentDto)
         {
             try
             {
                 var student = await _studentService.UpdateStudentAsync(id, updateStudentDto);
                 if (student == null)
                 {
-                    return NotFound(new { message = "Student not found." });
+                    var notFoundResponse = ApiResponseHelper.Error<StudentResponseDTO>("Student not found.", 404);
+                    return NotFound(notFoundResponse);
                 }
-                return Ok(student);
+                var response = ApiResponseHelper.Success(student, "Student updated successfully.");
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                var response = ApiResponseHelper.Error<StudentResponseDTO>(ex.Message, 400);
+                return BadRequest(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while updating the student.", details = ex.Message });
+                var response = ApiResponseHelper.Error<StudentResponseDTO>("An error occurred while updating the student.", 500);
+                return StatusCode(500, response);
             }
         }
 
         [HttpDelete("{id:guid}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult> DeleteStudent(Guid id)
+        public async Task<ActionResult<ApiResponse<object>>> DeleteStudent(Guid id)
         {
             try
             {
                 var result = await _studentService.DeleteStudentAsync(id);
                 if (!result)
                 {
-                    return NotFound(new { message = "Student not found." });
+                    var notFoundResponse = ApiResponseHelper.Error<object>("Student not found.", 404);
+                    return NotFound(notFoundResponse);
                 }
-                return NoContent();
+                var response = ApiResponseHelper.Success<object>(new { }, "Student deleted successfully.");
+                return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while deleting the student.", details = ex.Message });
+                var response = ApiResponseHelper.Error<object>("An error occurred while deleting the student.", 500);
+                return StatusCode(500, response);
             }
         }
     }

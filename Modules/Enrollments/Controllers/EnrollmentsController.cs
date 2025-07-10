@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SchoolManagementSystem.Modules.Enrollments.Dtos;
 using SchoolManagementSystem.Modules.Enrollments.Services;
 using System.Security.Claims;
+using SchoolManagementSystem.Common.Models;
+using SchoolManagementSystem.Common.Helpers;
 
 namespace SchoolManagementSystem.Modules.Enrollments.Controllers
 {
@@ -20,16 +22,58 @@ namespace SchoolManagementSystem.Modules.Enrollments.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<List<EnrollmentResponseDTO>>> GetAllEnrollments()
+        public async Task<ActionResult<ApiResponse<List<EnrollmentResponseDTO>>>> GetAllEnrollments()
         {
             try
             {
                 var enrollments = await _enrollmentService.GetAllEnrollmentsAsync();
-                return Ok(enrollments);
+                var response = ApiResponseHelper.Success(enrollments, $"{enrollments.Count} enrollments retrieved successfully.");
+                return Ok(response);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving enrollments.", details = ex.Message });
+                var response = ApiResponseHelper.Error<List<EnrollmentResponseDTO>>("An error occurred while retrieving enrollments.", 500);
+                return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("paginated")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<ApiResponse<List<EnrollmentResponseDTO>>>> GetAllEnrollmentsPaginated(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var (enrollments, totalCount) = await _enrollmentService.GetAllEnrollmentsPaginatedAsync(page, pageSize);
+                var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                var paginationMetadata = new PaginationMetadata
+                {
+                    Page = page,
+                    Size = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = totalPages,
+                    HasPrevious = page > 1,
+                    HasNext = page < totalPages
+                };
+
+                var response = new ApiResponse<List<EnrollmentResponseDTO>>
+                {
+                    Success = true,
+                    Message = $"{enrollments.Count} enrollments retrieved successfully.",
+                    Data = enrollments,
+                    StatusCode = 200,
+                    Pagination = paginationMetadata
+                };
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, ApiResponseHelper.Error<List<EnrollmentResponseDTO>>("An error occurred while retrieving the enrollments.", StatusCodes.Status500InternalServerError));
             }
         }
 
