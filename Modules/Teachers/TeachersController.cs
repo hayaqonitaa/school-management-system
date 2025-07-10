@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SchoolManagementSystem.Modules.Teachers.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/teachers")]
     [ApiController]
 
     public class TeachersController : ControllerBase

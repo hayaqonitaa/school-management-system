@@ -6,7 +6,7 @@ using SchoolManagementSystem.Modules.Classes.Entities;
 
 namespace SchoolManagementSystem.Modules.Classes.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/classteachers")]
     [ApiController]
     [Authorize(Roles = "Admin")]
     public class ClassTeachersController : ControllerBase

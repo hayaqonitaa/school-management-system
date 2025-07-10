@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace SchoolManagementSystem.Modules.Classes.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/classes")]
     [ApiController]
     [Authorize]
     public class ClassesController : ControllerBase

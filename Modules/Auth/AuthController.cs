@@ -5,7 +5,7 @@ using SchoolManagementSystem.Modules.Auth.Services;
 namespace SchoolManagementSystem.Modules.Auth
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;

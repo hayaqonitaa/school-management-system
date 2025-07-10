@@ -6,7 +6,7 @@ using SchoolManagementSystem.Modules.Students.Services;
 namespace SchoolManagementSystem.Modules.Students
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/students")]
     public class StudentsController : ControllerBase
     {
         private readonly IStudentService _studentService;
