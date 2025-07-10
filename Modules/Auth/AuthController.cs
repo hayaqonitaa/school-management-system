@@ -20,55 +20,22 @@ namespace SchoolManagementSystem.Modules.Auth
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequestDTO loginRequest)
         {
-            try
-            {
-                var response = await _authService.LoginAsync(loginRequest);
-                return Ok(ApiResponseHelper.Success(response, "Login successful."));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status401Unauthorized));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status400BadRequest));
-            }
+            var response = await _authService.LoginAsync(loginRequest);
+            return Ok(ApiResponseHelper.Success(response, "Login successful."));
         }
         
         // [HttpPost("register")]
         // public async Task<IActionResult> Register(RegisterRequestDTO registerRequest)
         // {
-        //     try
-        //     {
-        //         var response = await _authService.RegisterAsync(registerRequest);
-        //         return Ok(response);
-        //     }
-        //     catch (ArgumentException ex)
-        //     {
-        //         return BadRequest(new { message = ex.Message });
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return BadRequest(new { message = ex.Message });
-        //     }
+        //     var response = await _authService.RegisterAsync(registerRequest);
+        //     return Ok(ApiResponseHelper.Success(response, "Registration successful."));
         // }
         
         [HttpPost("admin/login")]
         public async Task<IActionResult> AdminLogin(LoginRequestDTO loginRequest)
         {
-            try
-            {
-                var response = await _authService.LoginAdminAsync(loginRequest);
-                return Ok(ApiResponseHelper.Success(response, "Admin login successful."));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status401Unauthorized));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ApiResponseHelper.Error<object>(ex.Message, StatusCodes.Status400BadRequest));
-            }
+            var response = await _authService.LoginAdminAsync(loginRequest);
+            return Ok(ApiResponseHelper.Success(response, "Admin login successful."));
         }
     }
 }

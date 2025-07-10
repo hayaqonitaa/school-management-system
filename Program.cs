@@ -29,7 +29,11 @@ builder.Services.AddDbContext<DatabaseConfig>(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => 
+{
+    options.Filters.Add<SchoolManagementSystem.Common.Filters.ValidateModelStateFilter>();
+    options.Filters.Add<SchoolManagementSystem.Common.Filters.GlobalExceptionFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure Swagger with JWT Authentication

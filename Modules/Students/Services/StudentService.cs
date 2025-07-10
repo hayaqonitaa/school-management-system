@@ -6,6 +6,10 @@ using SchoolManagementSystem.Modules.Students.Repositories;
 using SchoolManagementSystem.Modules.Students.Mappers;
 using SchoolManagementSystem.Modules.Users.Entities;
 using SchoolManagementSystem.Common.Constants;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SchoolManagementSystem.Modules.Students.Services
 {
@@ -13,119 +17,169 @@ namespace SchoolManagementSystem.Modules.Students.Services
     {
         private readonly IStudentRepository _studentRepository;
         private readonly DatabaseConfig _context;
+        private readonly ILogger<StudentService> _logger;
         
-        public StudentService(IStudentRepository studentRepository, DatabaseConfig context)
+        public StudentService(IStudentRepository studentRepository, DatabaseConfig context, ILogger<StudentService> logger)
         {
             _studentRepository = studentRepository;
             _context = context;
+            _logger = logger;
         }
         
         public async Task<StudentResponseDTO> CreateStudentAsync(CreateStudentDTO createStudentDTO)
         {
-            // cek NISN
-            var existingStudentByNISN = await _context.Students
-                .FirstOrDefaultAsync(s => s.NISN == createStudentDTO.NISN);
-            if (existingStudentByNISN != null)
+            try
             {
-                throw new ArgumentException("NISN already exists");
+                // cek NISN
+                var existingStudentByNISN = await _context.Students
+                    .FirstOrDefaultAsync(s => s.NISN == createStudentDTO.NISN);
+                if (existingStudentByNISN != null)
+                {
+                    throw new ArgumentException("NISN already exists");
+                }
+                
+                // cek email
+                var existingStudentByEmail = await _context.Students
+                    .FirstOrDefaultAsync(s => s.Email == createStudentDTO.Email);
+                if (existingStudentByEmail != null)
+                {
+                    throw new ArgumentException("Email already exists");
+                }
+                
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(createStudentDTO.Password);
+                
+                var student = createStudentDTO.ToEntity(hashedPassword);
+                
+                // save to database
+                var createdStudent = await _studentRepository.CreateAsync(student);
+                
+                // create user record for authentication
+                var user = new User
+                {
+                    IdUser = createdStudent.Id,
+                    Role = UserRoles.Student
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                
+                // return response DTO using mapper
+                return createdStudent.ToResponseDTO();
             }
-            
-            // cek email
-            var existingStudentByEmail = await _context.Students
-                .FirstOrDefaultAsync(s => s.Email == createStudentDTO.Email);
-            if (existingStudentByEmail != null)
+            catch (Exception ex)
             {
-                throw new ArgumentException("Email already exists");
+                _logger.LogError(ex, "Error creating student: {Message}", ex.Message);
+                throw; // Re-throw to be caught by the global exception filter
             }
-            
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(createStudentDTO.Password);
-            
-            var student = createStudentDTO.ToEntity(hashedPassword);
-            
-            // save to database
-            var createdStudent = await _studentRepository.CreateAsync(student);
-            
-            // create user record for authentication
-            var user = new User
-            {
-                IdUser = createdStudent.Id,
-                Role = UserRoles.Student
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            
-            // return response DTO using mapper
-            return createdStudent.ToResponseDTO();
         }
         
         public async Task<StudentResponseDTO?> GetStudentByIdAsync(Guid id)
         {
-            var student = await _studentRepository.GetByIdAsync(id);
-            if (student == null) return null;
-            
-            return student.ToResponseDTO();
+            try
+            {
+                var student = await _studentRepository.GetByIdAsync(id);
+                if (student == null) return null;
+                
+                return student.ToResponseDTO();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving student by ID {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
         
         public async Task<List<StudentResponseDTO>> GetAllStudentsAsync()
         {
-            var students = await _studentRepository.GetAllAsync();
-            return students.ToResponseDTOList();
+            try
+            {
+                var students = await _studentRepository.GetAllAsync();
+                return students.ToResponseDTOList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all students: {Message}", ex.Message);
+                throw;
+            }
         }
         
         public async Task<StudentResponseDTO> UpdateStudentAsync(Guid id, CreateStudentDTO updateStudentDTO)
         {
-            var student = await _studentRepository.GetByIdAsync(id);
-            if (student == null)
+            try
             {
-                throw new ArgumentException("Student not found");
+                var student = await _studentRepository.GetByIdAsync(id);
+                if (student == null)
+                {
+                    throw new KeyNotFoundException("Student not found");
+                }
+                
+                var existingStudentByNISN = await _context.Students
+                    .FirstOrDefaultAsync(s => s.NISN == updateStudentDTO.NISN && s.Id != id);
+                if (existingStudentByNISN != null)
+                {
+                    throw new ArgumentException("NISN already exists");
+                }
+                
+                // if email already exists (kecuali current student)
+                var existingStudentByEmail = await _context.Students
+                    .FirstOrDefaultAsync(s => s.Email == updateStudentDTO.Email && s.Id != id);
+                if (existingStudentByEmail != null)
+                {
+                    throw new ArgumentException("Email already exists");
+                }
+                
+                // update student properties using mapper
+                var hashedPassword = !string.IsNullOrEmpty(updateStudentDTO.Password) 
+                    ? BCrypt.Net.BCrypt.HashPassword(updateStudentDTO.Password) 
+                    : null;
+                
+                student.UpdateFromDTO(updateStudentDTO, hashedPassword);
+                
+                var updatedStudent = await _studentRepository.UpdateAsync(student);
+                
+                return updatedStudent.ToResponseDTO();
             }
-            
-            var existingStudentByNISN = await _context.Students
-                .FirstOrDefaultAsync(s => s.NISN == updateStudentDTO.NISN && s.Id != id);
-            if (existingStudentByNISN != null)
+            catch (Exception ex)
             {
-                throw new ArgumentException("NISN already exists");
+                _logger.LogError(ex, "Error updating student {Id}: {Message}", id, ex.Message);
+                throw;
             }
-            
-            // if email already exists (kecuali current student)
-            var existingStudentByEmail = await _context.Students
-                .FirstOrDefaultAsync(s => s.Email == updateStudentDTO.Email && s.Id != id);
-            if (existingStudentByEmail != null)
-            {
-                throw new ArgumentException("Email already exists");
-            }
-            
-            // update student properties using mapper
-            var hashedPassword = !string.IsNullOrEmpty(updateStudentDTO.Password) 
-                ? BCrypt.Net.BCrypt.HashPassword(updateStudentDTO.Password) 
-                : null;
-            
-            student.UpdateFromDTO(updateStudentDTO, hashedPassword);
-            
-            var updatedStudent = await _studentRepository.UpdateAsync(student);
-            
-            return updatedStudent.ToResponseDTO();
         }
         
         public async Task<bool> DeleteStudentAsync(Guid id)
         {
-            // delete user record 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id && u.Role == UserRoles.Student);
-            if (user != null)
+            try
             {
-                _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
+                // delete user record 
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id && u.Role == UserRoles.Student);
+                if (user != null)
+                {
+                    _context.Users.Remove(user);
+                    await _context.SaveChangesAsync();
+                }
+                
+                // delete student record
+                return await _studentRepository.DeleteAsync(id);
             }
-            
-            // delete student record
-            return await _studentRepository.DeleteAsync(id);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting student {Id}: {Message}", id, ex.Message);
+                throw;
+            }
         }
 
         public async Task<(List<StudentResponseDTO> students, int totalCount)> GetAllStudentsPaginatedAsync(int page, int size)
         {
-            var (students, totalCount) = await _studentRepository.GetAllPaginatedAsync(page, size);
-            var studentDTOs = students.ToResponseDTOList();
-            return (studentDTOs, totalCount);
+            try
+            {
+                var (students, totalCount) = await _studentRepository.GetAllPaginatedAsync(page, size);
+                var studentDTOs = students.ToResponseDTOList();
+                return (studentDTOs, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paginated students (page: {Page}, size: {Size}): {Message}", page, size, ex.Message);
+                throw;
+            }
         }
     }
 }
