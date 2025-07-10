@@ -70,7 +70,7 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ClassResponseDTO>> UpdateClass(Guid id, [FromBody] CreateClassDTO updateClassDto)
         {

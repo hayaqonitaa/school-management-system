@@ -72,7 +72,7 @@ namespace SchoolManagementSystem.Modules.Teachers.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TeacherResponseDTO>> UpdateTeacher(Guid id, [FromBody] CreateTeacherDTO updateTeacherDto)
         {

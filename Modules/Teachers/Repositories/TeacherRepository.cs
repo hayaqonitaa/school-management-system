@@ -21,12 +21,16 @@ namespace SchoolManagementSystem.Modules.Teachers.Repositories
 
         public async Task<Teacher?> GetByIdAsync(Guid id)
         {
-            return await _context.Teachers.FindAsync(id);
+            return await _context.Teachers
+                .FromSqlRaw("SELECT * FROM \"Teachers\" WHERE \"Id\" = {0}", id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Teacher>> GetAllAsync()
         {
-            return await _context.Teachers.ToListAsync();
+            return await _context.Teachers
+                .FromSqlRaw("SELECT * FROM \"Teachers\"")
+                .ToListAsync();
         }
 
         public async Task<Teacher> UpdateAsync(Teacher teacher)
@@ -38,7 +42,9 @@ namespace SchoolManagementSystem.Modules.Teachers.Repositories
 
         public async Task<bool> DeleteAsync(Guid id)
         { 
-            var teacher = await GetByIdAsync(id);
+            var teacher = await _context.Teachers
+                .FromSqlRaw("SELECT * FROM \"Teachers\" WHERE \"Id\" = {0}", id)
+                .FirstOrDefaultAsync();
             if (teacher == null) return false;
 
             _context.Teachers.Remove(teacher);

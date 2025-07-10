@@ -15,6 +15,11 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
         public async Task<List<ClassTeacher>> GetAllAsync()
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id""")
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
                 .ToListAsync();
@@ -23,53 +28,85 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
         public async Task<ClassTeacher?> GetByIdAsync(Guid id)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""Id"" = {0}", id)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .FirstOrDefaultAsync(ct => ct.Id == id);
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<ClassTeacher>> GetByTeacherIdAsync(Guid teacherId)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""IdTeacher"" = {0}", teacherId)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .Where(ct => ct.IdTeacher == teacherId)
                 .ToListAsync();
         }
 
         public async Task<List<ClassTeacher>> GetByClassIdAsync(Guid classId)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""IdClass"" = {0}", classId)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .Where(ct => ct.IdClass == classId)
                 .ToListAsync();
         }
 
         public async Task<List<ClassTeacher>> GetByTahunAsync(int tahun)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""Tahun"" = {0}", tahun)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .Where(ct => ct.Tahun == tahun)
                 .ToListAsync();
         }
 
         public async Task<List<ClassTeacher>> GetByStatusAsync(AssignmentStatus status)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""Status"" = {0}", (int)status)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .Where(ct => ct.Status == status)
                 .ToListAsync();
         }
 
         public async Task<ClassTeacher?> GetByTeacherAndYearAsync(Guid teacherId, int tahun)
         {
             return await _context.ClassTeachers
+                .FromSqlRaw(@"
+                    SELECT ct.*, t.*, c.* 
+                    FROM ""ClassTeachers"" ct 
+                    LEFT JOIN ""Teachers"" t ON ct.""IdTeacher"" = t.""Id"" 
+                    LEFT JOIN ""Classes"" c ON ct.""IdClass"" = c.""Id"" 
+                    WHERE ct.""IdTeacher"" = {0} AND ct.""Tahun"" = {1}", teacherId, tahun)
                 .Include(ct => ct.Teacher)
                 .Include(ct => ct.Class)
-                .FirstOrDefaultAsync(ct => ct.IdTeacher == teacherId && ct.Tahun == tahun);
+                .FirstOrDefaultAsync();
         }
 
         public async Task<ClassTeacher> CreateAsync(ClassTeacher classTeacher)
@@ -88,7 +125,9 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            var classTeacher = await GetByIdAsync(id);
+            var classTeacher = await _context.ClassTeachers
+                .FromSqlRaw("SELECT * FROM \"ClassTeachers\" WHERE \"Id\" = {0}", id)
+                .FirstOrDefaultAsync();
             if (classTeacher == null) return false;
 
             _context.ClassTeachers.Remove(classTeacher);
@@ -98,7 +137,10 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
 
         public async Task<bool> ExistsAsync(Guid id)
         {
-            return await _context.ClassTeachers.AnyAsync(ct => ct.Id == id);
+            var result = await _context.Database
+                .SqlQueryRaw<int>("SELECT COUNT(*) FROM \"ClassTeachers\" WHERE \"Id\" = {0}", id)
+                .FirstAsync();
+            return result > 0;
         }
     }
 }

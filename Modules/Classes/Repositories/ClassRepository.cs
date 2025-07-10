@@ -14,17 +14,23 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
 
         public async Task<List<Class>> GetAllAsync()
         {
-            return await _context.Classes.ToListAsync();
+            return await _context.Classes
+                .FromSqlRaw("SELECT * FROM \"Classes\"")
+                .ToListAsync();
         }
 
         public async Task<Class?> GetByIdAsync(Guid id)
         {
-            return await _context.Classes.FindAsync(id);
+            return await _context.Classes
+                .FromSqlRaw("SELECT * FROM \"Classes\" WHERE \"Id\" = {0}", id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Class?> GetByKelasAsync(string kelas)
         {
-            return await _context.Classes.FirstOrDefaultAsync(c => c.Kelas == kelas);
+            return await _context.Classes
+                .FromSqlRaw("SELECT * FROM \"Classes\" WHERE \"Kelas\" = {0}", kelas)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Class> CreateAsync(Class classEntity)
@@ -43,7 +49,9 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
 
         public async Task<bool> DeleteAsync(Guid id)
         {
-            var classEntity = await GetByIdAsync(id);
+            var classEntity = await _context.Classes
+                .FromSqlRaw("SELECT * FROM \"Classes\" WHERE \"Id\" = {0}", id)
+                .FirstOrDefaultAsync();
             if (classEntity == null) return false;
 
             _context.Classes.Remove(classEntity);
@@ -53,12 +61,17 @@ namespace SchoolManagementSystem.Modules.Classes.Repositories
 
         public async Task<bool> ExistsAsync(Guid id)
         {
-            return await _context.Classes.AnyAsync(c => c.Id == id);
+            var result = await _context.Database
+                .SqlQueryRaw<int>("SELECT COUNT(*) FROM \"Classes\" WHERE \"Id\" = {0}", id)
+                .FirstAsync();
+            return result > 0;
         }
 
         public async Task<List<Class>> GetByTingkatAsync(int tingkat)
         {
-            return await _context.Classes.Where(c => c.Tingkat == tingkat).ToListAsync();
+            return await _context.Classes
+                .FromSqlRaw("SELECT * FROM \"Classes\" WHERE \"Tingkat\" = {0}", tingkat)
+                .ToListAsync();
         }
     }
 }

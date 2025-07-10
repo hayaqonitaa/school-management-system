@@ -57,7 +57,7 @@ namespace SchoolManagementSystem.Modules.Classes.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<ClassTeacherResponseDTO>> UpdateClassTeacher(Guid id, [FromBody] CreateClassTeacherDTO updateClassTeacherDto)
         {
             try

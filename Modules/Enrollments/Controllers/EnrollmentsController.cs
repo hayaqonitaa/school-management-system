@@ -146,7 +146,7 @@ namespace SchoolManagementSystem.Modules.Enrollments.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "Admin, Teacher")]
         public async Task<ActionResult<EnrollmentResponseDTO>> UpdateEnrollment(Guid id, [FromBody] CreateEnrollmentDTO updateEnrollmentDto)
         {

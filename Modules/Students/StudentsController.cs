@@ -67,7 +67,7 @@ namespace SchoolManagementSystem.Modules.Students
             }
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<StudentResponseDTO>> UpdateStudent(Guid id, [FromBody] CreateStudentDTO updateStudentDto)
         {
